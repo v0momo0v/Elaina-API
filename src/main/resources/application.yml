@@ -33,3 +33,14 @@ api:
   client:
     access-key: elaina
     secret-key: love
+
+dubbo:
+  application:
+    qosPort: 22221
+    name: dubbo-springboot-demo-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848

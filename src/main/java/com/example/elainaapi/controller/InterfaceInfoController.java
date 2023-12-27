@@ -5,22 +5,20 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.elainaapi.annotation.AuthCheck;
 import com.example.elainaapi.common.*;
 import com.example.elainaapi.constant.CommonConstant;
-import com.example.elainaapi.constant.UserConstant;
 import com.example.elainaapi.exception.BusinessException;
-import com.example.elainaapi.exception.ThrowUtils;
 import com.example.elainaapi.model.dto.interfaceInfo.InterfaceInfoAddRequest;
 import com.example.elainaapi.model.dto.interfaceInfo.InterfaceInfoInvokeRequest;
 import com.example.elainaapi.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
 import com.example.elainaapi.model.dto.interfaceInfo.InterfaceInfoUpdateRequest;
-import com.example.elainaapi.model.entity.InterfaceInfo;
-import com.example.elainaapi.model.entity.User;
 import com.example.elainaapi.model.enums.InterfaceInfoStatusEnum;
 import com.example.elainaapi.service.InterfaceInfoService;
 import com.example.elainaapi.service.UserService;
+import com.example.elainaapicommon.model.entity.InterfaceInfo;
+import com.example.elainaapicommon.model.entity.User;
 import com.example.elainaapisdk.client.ApiClient;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
-import nonapi.io.github.classgraph.json.Id;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -189,6 +187,8 @@ public class InterfaceInfoController {
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
         Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
+        System.out.println("运行到这里了");
+        System.out.println("这是数据"+interfaceInfoPage.getTotal());
         return ResultUtils.success(interfaceInfoPage);
     }
     /**
@@ -260,7 +260,7 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/invoke")
-    public BaseResponse<Object> offlineInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+    public BaseResponse<Object> invokelineInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
                                                       HttpServletRequest request) {
         //接口是否可调用
         if(interfaceInfoInvokeRequest==null||interfaceInfoInvokeRequest.getId()<0){
@@ -281,7 +281,11 @@ public class InterfaceInfoController {
         String secretKey = loginUser.getSecretKey();
         ApiClient tempClient = new ApiClient(accessKey,secretKey);
         Gson gson=new Gson();
-        com.example.elainaapisdk.model.User user = gson.fromJson(requestParams, com.example.elainaapisdk.model.User.class);
+        com.example.elainaapisdk.model.User user=new com.example.elainaapisdk.model.User();
+        if(requestParams!=null){
+            user = gson.fromJson(requestParams, com.example.elainaapisdk.model.User.class);
+        }
+        user.setId(id);
         String usernameByPost = tempClient.getUsernameByPost(user);
         return ResultUtils.success(usernameByPost);
     }
